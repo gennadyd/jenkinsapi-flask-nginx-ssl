@@ -1,0 +1,5 @@
+---
+application_name: my-jenkins
+volume:
+    host_path: "/var/docker/{{application_name}}"
+    container_path: "/var/jenkins_home"

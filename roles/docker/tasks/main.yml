@@ -1,0 +1,84 @@
+---
+-   name: Install python setup tools
+    apt: name=python-setuptools
+    tags: docker
+
+-   name: Install Pypi
+    easy_install: name=pip
+    tags: docker
+
+-   name: Install docker-py
+    pip: name=docker-py version=1.9.0 
+    tags: docker
+
+-   name: Install image-extra for docker to use aufs storage drivers
+    apt: 
+      name: linux-image-extra-{{kernelVer}}
+-   name: Install image-extra-virtual      
+    apt:
+      name: linux-image-extra-virtual
+
+-   name: Add the key of the docker repository
+    apt_key: 
+      keyserver: "hkp://p80.pool.sks-keyservers.net:80"
+      id: "{{ dockerRepoKey }}"
+      state: present
+
+-   name: Add docker repository
+    apt_repository:
+      repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   {{ ansible_distribution_release }} \
+   stable"
+      state: present
+
+-   name: Remove Docker-engine
+    apt:
+      name: docker-engine
+      state: absent
+      force: yes
+
+-   name: Install Docker
+    apt:
+      update_cache: yes 
+      name: docker-ce={{ dockerVer }}
+      state: present 
+      force: yes
+    tags: docker
+
+-   name: Ensure docker is using overlay2 storage driver
+    template: src=daemon.json.j2 dest=/etc/docker/daemon.json
+    register: daemon_template
+
+-   name: Make sure Docker is running
+    service: name=docker state=started
+    tags: docker
+    
+- name: ensure user can use docker
+  user: name={{ansible_ssh_user}} groups=docker append=yes
+  tags: docker
+
+- name: Prune unused volumes
+  shell: "docker volume prune -f"
+  tags: docker
+
+#If overlay2 is now installed, we need to drop everything we have and restart the daemon
+- name: delete all containers if storage driver changed
+  shell: "docker ps -aq | xargs -r docker rm -f"
+  when: daemon_template.changed
+  tags: docker
+
+- name: delete all images if storage driver changed
+  shell: "docker images -aq | xargs -r docker rmi -f"
+  ignore_errors: true
+  when: daemon_template.changed
+  tags: docker
+
+- name: delete all volumes if storage driver changed
+  shell: "docker volumes ls -q | xargs -r docker volumes rm"
+  when: daemon_template.changed
+  tags: docker
+
+- name: restart daemon if storage driver changed
+  service: name=docker state=restarted
+  when: daemon_template.changed
+  tags: docker

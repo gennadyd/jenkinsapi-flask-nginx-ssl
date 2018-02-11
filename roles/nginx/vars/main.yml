@@ -1,0 +1,7 @@
+---
+application_name: my-nginx
+
+flask:
+    port: 5000
+    url: "{{inventory_hostname}}:5000"
+

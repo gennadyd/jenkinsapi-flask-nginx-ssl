@@ -1,0 +1,7 @@
+[all:vars]
+ansible_ssh_user=<user>
+ansible_ssh_pass=<user_passwd>
+ansible_become_pass=<user_passwd>
+
+[all_in_one]
+<Your_IP_Address>

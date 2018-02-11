@@ -1,0 +1,27 @@
+#Create folder for files: Dockerfile ...
+- name: create workplace for {{application_name}} Docker
+  file: name="/var/docker/{{application_name}}" state=directory
+
+- name: synchronize folder to /var/docker/{{application_name}}
+  copy: src=files/ dest="/var/docker/{{application_name}}" mode=755
+
+- name: check or build image
+  docker_image:
+    path: /var/docker/{{application_name}}
+    name: "{{application_name}}-image"
+    state: present
+
+- name: create docker container {{inventory_hostname}}
+  docker:
+        docker_user: root
+        name: "{{application_name}}-container"
+        image: "{{application_name}}-image:latest"
+        detach: true
+        state: reloaded
+        env:
+        volumes:
+          - "{{volume.host_path}}:{{volume.container_path}}"
+        ports:
+           - "{{ inventory_hostname }}:8080:8080"
+           - "{{ inventory_hostname }}:50000:50000"
+

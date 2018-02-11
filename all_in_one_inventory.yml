@@ -1,0 +1,7 @@
+---
+- hosts: all_in_one
+  roles:
+    - docker
+    - jenkins
+    - nginx
+    - flask

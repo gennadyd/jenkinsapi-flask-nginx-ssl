@@ -1,0 +1,6 @@
+---
+application_name: my-flask
+jenkins:
+    username: "admin"
+    password: 'admin'
+    url: "{{inventory_hostname}}:8080"

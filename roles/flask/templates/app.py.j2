@@ -1,0 +1,33 @@
+from flask import Flask
+from jenkinsapi.jenkins import Jenkins
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "Flask inside Docker!!"
+
+@app.route("/build")
+def test():
+	
+
+    server = Jenkins('http://{{jenkins.url}}', username = '{{jenkins.username}}', password = '{{jenkins.password}}')
+
+    for j in server.get_jobs():
+        job_instance = server.get_job(j[0])
+        builds = job_instance.get_build_dict()
+        num_builds = len(builds)
+
+        longest_duration = 0
+        longest_build = 0
+
+        for build in builds:
+            build_duration = job_instance.get_build(build).get_duration().total_seconds()
+            if build_duration > longest_duration:
+                longest_duration = build_duration
+                longest_build = build
+
+        return '**Job %s : Out of %s builds, build number %s took the longest to run: %s seconds** ' %(job_instance.name, num_builds, longest_build, longest_duration)
+
+if __name__ == "__main__":
+    app.run(debug=True,host='0.0.0.0')

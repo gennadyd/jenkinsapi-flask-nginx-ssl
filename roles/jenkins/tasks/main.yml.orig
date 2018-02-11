@@ -1,0 +1,26 @@
+#Create folder for files: Dockerfile ...
+- name: create workplace for Docker at /var/jenkins_home 
+  file: name="/var/jenkins_home" state=directory
+
+- name: synchronize folder to /var/jenkins_home
+  copy: src=files/ dest="/var/jenkins_home" mode=755
+
+- name: check or build image
+  docker_image:
+    path: /var/jenkins_home
+    name: jenkins-image
+    state: present
+
+- name: create docker container {{ inventory_hostname }}:8080:8080
+  docker:
+        docker_user: root
+        name: jenkins-container
+        image: jenkins-image:latest
+        detach: true
+        state: reloaded
+        env:
+        volumes:
+          - "/var/jenkins_home:/var/jenkins_home"
+        ports:
+           - "{{ inventory_hostname }}:8080:8080"
+           - "{{ inventory_hostname }}:50000:50000"
