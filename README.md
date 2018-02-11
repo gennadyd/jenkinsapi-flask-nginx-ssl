@@ -6,8 +6,9 @@ In this tutorial you will find how to build dockerized microservice
 	Flask application that provides statistics of the Jenkins 
 	Nginx as a reverse proxy for the flask app
 
-Usage
-edit 
-	all_in_one_inventory file 
-run 
+Usage: 
+
+edit </br>
+	all_in_one_inventory file </br>
+run </br>
 	ansible-playbook  -i all_in_one_inventory all_in_one_inventory.yml
