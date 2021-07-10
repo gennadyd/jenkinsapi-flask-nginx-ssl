@@ -1,5 +1,5 @@
 # Start from python
-FROM python:2.7
+FROM python:3.7.10
 # PACKAGES
 COPY . /app
 WORKDIR /app
